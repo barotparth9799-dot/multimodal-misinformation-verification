@@ -1,0 +1,11 @@
+evidence_id,text,source,url
+E001,"Vaccines are tested for safety and effectiveness before they are approved for public use.","WHO","https://www.who.int/health-topics/vaccines-and-immunization"
+E002,"Climate change refers to long-term shifts in temperatures and weather patterns, mainly caused by human activities since the 1800s.","NASA","https://science.nasa.gov/climate-change/"
+E003,"The Earth is the third planet from the Sun and is the only astronomical object known to harbor life.","NASA","https://science.nasa.gov/earth/"
+E004,"Regular physical activity can provide health benefits and can reduce the risk of several chronic diseases.","WHO","https://www.who.int/news-room/fact-sheets/detail/physical-activity"
+E005,"Water boils at approximately 100 degrees Celsius at standard atmospheric pressure.","NIST","https://www.nist.gov/"
+E006,"The Moon is Earth's only natural satellite.","NASA","https://science.nasa.gov/moon/"
+E007,"Photosynthesis allows green plants to convert light energy into chemical energy.","Britannica","https://www.britannica.com/science/photosynthesis"
+E008,"The Pacific Ocean is the largest and deepest ocean on Earth.","NOAA","https://oceanservice.noaa.gov/facts/pacific.html"
+E009,"Artificial intelligence systems can process data and identify patterns to perform tasks that normally require human intelligence.","IBM","https://www.ibm.com/think/topics/artificial-intelligence"
+E010,"Misinformation is false or inaccurate information that is shared regardless of an intention to deceive.","UNESCO","https://www.unesco.org/en/freedom-expression"
