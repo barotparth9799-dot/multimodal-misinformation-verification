@@ -1,8 +1,9 @@
 """
-Image encoder for the Multimodal Misinformation Verification project.
+Image and OpenCLIP text encoder for the Multimodal Misinformation
+Verification project.
 
-This module uses OpenCLIP to convert images into normalized feature
-embeddings that can be compared with text embeddings.
+This module uses OpenCLIP to convert images and text into normalized
+feature embeddings in the same shared multimodal embedding space.
 """
 
 from pathlib import Path
@@ -20,7 +21,7 @@ from configs.config import (
 
 class ImageEncoder:
     """
-    Encodes images using a pretrained OpenCLIP vision model.
+    Encodes images and text using a pretrained OpenCLIP model.
     """
 
     def __init__(
@@ -33,34 +34,26 @@ class ImageEncoder:
         self.pretrained = pretrained
         self.device = torch.device(device)
 
-        self.model, _, self.preprocess = open_clip.create_model_and_transforms(
-            self.model_name,
-            pretrained=self.pretrained,
+        self.model, _, self.preprocess = (
+            open_clip.create_model_and_transforms(
+                self.model_name,
+                pretrained=self.pretrained,
+            )
+        )
+
+        self.tokenizer = open_clip.get_tokenizer(
+            self.model_name
         )
 
         self.model.to(self.device)
         self.model.eval()
 
-    def load_image(self, image_path: str | Path) -> Image.Image:
+    def load_image(
+        self,
+        image_path: str | Path,
+    ) -> Image.Image:
         """
         Load an image from disk and convert it to RGB.
-
-        Parameters
-        ----------
-        image_path:
-            Path to the image file.
-
-        Returns
-        -------
-        PIL.Image.Image
-            RGB image.
-
-        Raises
-        ------
-        FileNotFoundError
-            If the image does not exist.
-        ValueError
-            If the file cannot be opened as an image.
         """
 
         image_path = Path(image_path)
@@ -84,17 +77,8 @@ class ImageEncoder:
         image: Image.Image,
     ) -> torch.Tensor:
         """
-        Convert a PIL image into a normalized image embedding.
-
-        Parameters
-        ----------
-        image:
-            RGB PIL image.
-
-        Returns
-        -------
-        torch.Tensor
-            Normalized image embedding.
+        Convert a PIL image into a normalized OpenCLIP
+        image embedding.
         """
 
         if not isinstance(image, Image.Image):
@@ -102,8 +86,13 @@ class ImageEncoder:
                 "image must be a PIL.Image.Image object."
             )
 
-        image_tensor = self.preprocess(image).unsqueeze(0)
-        image_tensor = image_tensor.to(self.device)
+        image_tensor = self.preprocess(
+            image
+        ).unsqueeze(0)
+
+        image_tensor = image_tensor.to(
+            self.device
+        )
 
         with torch.no_grad():
             image_features = self.model.encode_image(
@@ -138,16 +127,6 @@ class ImageEncoder:
     ) -> torch.Tensor:
         """
         Encode multiple PIL images as a batch.
-
-        Parameters
-        ----------
-        images:
-            List of RGB PIL images.
-
-        Returns
-        -------
-        torch.Tensor
-            Normalized image embeddings.
         """
 
         if not images:
@@ -170,7 +149,9 @@ class ImageEncoder:
             ]
         )
 
-        image_tensors = image_tensors.to(self.device)
+        image_tensors = image_tensors.to(
+            self.device
+        )
 
         with torch.no_grad():
             image_features = self.model.encode_image(
@@ -186,6 +167,53 @@ class ImageEncoder:
         )
 
         return image_features.cpu()
+
+    def encode_text(
+        self,
+        texts: str | list[str],
+    ) -> torch.Tensor:
+        """
+        Convert text into normalized OpenCLIP text embeddings.
+
+        These embeddings are in the same shared space as the
+        OpenCLIP image embeddings and can therefore be compared
+        directly for text-image consistency.
+        """
+
+        if isinstance(texts, str):
+            texts = [texts]
+
+        if not texts:
+            raise ValueError(
+                "At least one text input is required."
+            )
+
+        if not all(
+            isinstance(text, str)
+            for text in texts
+        ):
+            raise TypeError(
+                "All text inputs must be strings."
+            )
+
+        tokens = self.tokenizer(
+            texts
+        ).to(self.device)
+
+        with torch.no_grad():
+            text_features = self.model.encode_text(
+                tokens
+            )
+
+        text_features = text_features.float()
+
+        text_features = torch.nn.functional.normalize(
+            text_features,
+            p=2,
+            dim=-1,
+        )
+
+        return text_features.cpu()
 
 
 def create_image_encoder() -> ImageEncoder:
