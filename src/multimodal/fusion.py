@@ -5,7 +5,8 @@ This module combines:
 1. Evidence support
 2. Text-image consistency
 
-The design avoids double-counting the same underlying signals.
+A consistency gate is used so that strong textual evidence
+cannot completely override a substantially inconsistent image.
 """
 
 from dataclasses import dataclass
@@ -33,14 +34,15 @@ class MultimodalFusion:
 
     Consistency represents how well the image agrees with the claim.
 
-    The final score combines these two independent signals
-    without double-counting them.
+    A consistency penalty is applied when the image shows weak
+    agreement with the claim.
     """
 
     def __init__(
         self,
         evidence_weight: float = 0.55,
         consistency_weight: float = 0.45,
+        consistency_gate: float = 0.60,
     ) -> None:
 
         if evidence_weight < 0 or consistency_weight < 0:
@@ -57,6 +59,11 @@ class MultimodalFusion:
                 "At least one fusion weight must be greater than zero."
             )
 
+        if not 0.0 <= consistency_gate <= 1.0:
+            raise ValueError(
+                "consistency_gate must be between 0 and 1."
+            )
+
         self.evidence_weight = (
             evidence_weight / total_weight
         )
@@ -64,6 +71,8 @@ class MultimodalFusion:
         self.consistency_weight = (
             consistency_weight / total_weight
         )
+
+        self.consistency_gate = consistency_gate
 
     @staticmethod
     def _validate_score(
@@ -93,11 +102,13 @@ class MultimodalFusion:
         """
         Combine evidence support and image consistency.
 
+        When consistency is below the configured gate, the evidence
+        contribution is reduced proportionally. This prevents strong
+        textual evidence from completely overriding an inconsistent
+        image.
+
         The text_score and image_score are retained for compatibility
-        with the existing pipeline and UI, but the final score uses
-        the two independent signals:
-        - evidence_score
-        - consistency_score
+        with the existing pipeline and UI.
         """
 
         text_score = self._validate_score(
@@ -120,8 +131,19 @@ class MultimodalFusion:
             "evidence_score",
         )
 
+        if consistency_score < self.consistency_gate:
+            consistency_factor = (
+                consistency_score / self.consistency_gate
+            )
+
+            adjusted_evidence_score = (
+                evidence_score * consistency_factor
+            )
+        else:
+            adjusted_evidence_score = evidence_score
+
         fused_score = (
-            self.evidence_weight * evidence_score
+            self.evidence_weight * adjusted_evidence_score
             + self.consistency_weight * consistency_score
         )
 
@@ -136,7 +158,7 @@ class MultimodalFusion:
 
 def create_fusion() -> MultimodalFusion:
     """
-    Create a MultimodalFusion instance with default weights.
+    Create a MultimodalFusion instance with default settings.
     """
 
     return MultimodalFusion()
