@@ -1,8 +1,11 @@
 """
 Multimodal fusion for the Multimodal Misinformation Verification project.
 
-This module combines text, image, consistency, and evidence signals
-into a single multimodal verification score.
+This module combines:
+1. Evidence support
+2. Text-image consistency
+
+The design avoids double-counting the same underlying signals.
 """
 
 from dataclasses import dataclass
@@ -11,7 +14,7 @@ from dataclasses import dataclass
 @dataclass
 class FusionResult:
     """
-    Stores the combined multimodal signals.
+    Stores the multimodal verification signals and final score.
     """
 
     text_score: float
@@ -23,42 +26,43 @@ class FusionResult:
 
 class MultimodalFusion:
     """
-    Combines multiple verification signals using weighted fusion.
+    Combines evidence support and text-image consistency.
+
+    Evidence support represents how strongly retrieved evidence
+    supports the claim.
+
+    Consistency represents how well the image agrees with the claim.
+
+    The final score combines these two independent signals
+    without double-counting them.
     """
 
     def __init__(
         self,
-        text_weight: float = 0.25,
-        image_weight: float = 0.20,
-        consistency_weight: float = 0.30,
-        evidence_weight: float = 0.25,
+        evidence_weight: float = 0.55,
+        consistency_weight: float = 0.45,
     ) -> None:
-        weights = [
-            text_weight,
-            image_weight,
-            consistency_weight,
-            evidence_weight,
-        ]
 
-        if any(weight < 0 for weight in weights):
+        if evidence_weight < 0 or consistency_weight < 0:
             raise ValueError(
                 "Fusion weights cannot be negative."
             )
 
-        total_weight = sum(weights)
+        total_weight = (
+            evidence_weight + consistency_weight
+        )
 
         if total_weight <= 0:
             raise ValueError(
                 "At least one fusion weight must be greater than zero."
             )
 
-        self.text_weight = text_weight / total_weight
-        self.image_weight = image_weight / total_weight
-        self.consistency_weight = (
-            consistency_weight / total_weight
-        )
         self.evidence_weight = (
             evidence_weight / total_weight
+        )
+
+        self.consistency_weight = (
+            consistency_weight / total_weight
         )
 
     @staticmethod
@@ -67,7 +71,7 @@ class MultimodalFusion:
         score_name: str,
     ) -> float:
         """
-        Validate and clamp a score to the range [0, 1].
+        Validate a score is within the range [0, 1].
         """
 
         score = float(score)
@@ -87,26 +91,13 @@ class MultimodalFusion:
         evidence_score: float,
     ) -> FusionResult:
         """
-        Combine the four verification signals.
+        Combine evidence support and image consistency.
 
-        Parameters
-        ----------
-        text_score:
-            Text-based verification signal.
-
-        image_score:
-            Image-based verification signal.
-
-        consistency_score:
-            Text-image consistency score.
-
-        evidence_score:
-            Relevance score of retrieved evidence.
-
-        Returns
-        -------
-        FusionResult
-            Individual signals and the final fused score.
+        The text_score and image_score are retained for compatibility
+        with the existing pipeline and UI, but the final score uses
+        the two independent signals:
+        - evidence_score
+        - consistency_score
         """
 
         text_score = self._validate_score(
@@ -130,10 +121,8 @@ class MultimodalFusion:
         )
 
         fused_score = (
-            self.text_weight * text_score
-            + self.image_weight * image_score
+            self.evidence_weight * evidence_score
             + self.consistency_weight * consistency_score
-            + self.evidence_weight * evidence_score
         )
 
         return FusionResult(
