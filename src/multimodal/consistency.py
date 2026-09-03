@@ -15,19 +15,6 @@ def cosine_similarity(
 ) -> float:
     """
     Calculate cosine similarity between one text and one image embedding.
-
-    Parameters
-    ----------
-    text_embedding:
-        Text embedding tensor.
-
-    image_embedding:
-        Image embedding tensor.
-
-    Returns
-    -------
-    float
-        Cosine similarity score.
     """
 
     if not isinstance(text_embedding, torch.Tensor):
@@ -64,16 +51,6 @@ def cosine_similarity(
 def normalize_similarity(similarity: float) -> float:
     """
     Convert cosine similarity from [-1, 1] to [0, 1].
-
-    Parameters
-    ----------
-    similarity:
-        Raw cosine similarity.
-
-    Returns
-    -------
-    float
-        Normalized similarity score.
     """
 
     if not -1.0 <= similarity <= 1.0:
@@ -91,18 +68,8 @@ def calculate_consistency_score(
     """
     Calculate a normalized text-image consistency score.
 
-    Parameters
-    ----------
-    text_embedding:
-        Text embedding tensor.
-
-    image_embedding:
-        Image embedding tensor.
-
-    Returns
-    -------
-    float
-        Consistency score between 0 and 1.
+    This preserves the original cosine-based consistency calculation
+    for compatibility with the existing pipeline.
     """
 
     similarity = cosine_similarity(
@@ -111,3 +78,44 @@ def calculate_consistency_score(
     )
 
     return normalize_similarity(similarity)
+
+
+def calculate_contrastive_consistency(
+    positive_text_embedding: torch.Tensor,
+    negative_text_embedding: torch.Tensor,
+    image_embedding: torch.Tensor,
+) -> float:
+    """
+    Calculate contrastive image-text consistency.
+
+    The score measures whether the image is more similar to the
+    positive claim description than to the negative description.
+
+    The result is normalized to the range [0, 1]:
+
+        0.5 = equal similarity
+        >0.5 = positive description is more compatible
+        <0.5 = negative description is more compatible
+    """
+
+    positive_similarity = cosine_similarity(
+        positive_text_embedding,
+        image_embedding,
+    )
+
+    negative_similarity = cosine_similarity(
+        negative_text_embedding,
+        image_embedding,
+    )
+
+    margin = positive_similarity - negative_similarity
+
+    score = 0.5 + (margin / 2.0)
+
+    return max(
+        0.0,
+        min(
+            1.0,
+            score,
+        ),
+    )
