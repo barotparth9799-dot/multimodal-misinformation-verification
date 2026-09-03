@@ -1,0 +1,62 @@
+MULTIMODAL MISINFORMATION VERIFICATION
+CONTROLLED EVALUATION RESULTS
+
+Case 1
+Claim: Climate change
+Image: Matching climate image
+Expected: VERIFIED
+Predicted: VERIFIED
+Confidence: 83.47%
+Consistency: 0.6326
+Evidence Score: 1.0000
+Fused Score: 0.8347
+
+Case 2
+Claim: Climate change
+Image: Unrelated car image
+Expected: UNCERTAIN
+Predicted: VERIFIED
+Confidence: 79.45%
+Consistency: 0.5814
+Evidence Score: 1.0000
+Fused Score: 0.7945
+
+Case 3
+Claim: Earth
+Image: Climate image
+Expected: UNCERTAIN
+Predicted: VERIFIED
+Confidence: 82.17%
+Consistency: 0.6072
+Evidence Score: 0.9972
+Fused Score: 0.8217
+
+Case 4
+Claim: Moon
+Image: Climate image
+Expected: UNCERTAIN
+Predicted: VERIFIED
+Confidence: 81.12%
+Consistency: 0.5981
+Evidence Score: 0.9887
+Fused Score: 0.8112
+
+Case 5
+Claim: Physical activity
+Image: Climate image
+Expected: UNCERTAIN
+Predicted: VERIFIED
+Confidence: 81.10%
+Consistency: 0.6041
+Evidence Score: 0.9802
+Fused Score: 0.8110
+
+Case 6
+Claim: Artificial intelligence
+Image: Unrelated car image
+Expected: UNCERTAIN
+Predicted: UNCERTAIN
+Confidence: 37.79%
+Consistency: 0.5916
+Evidence Score: 0.7794
+Fused Score: 0.6890
