@@ -76,7 +76,7 @@ class Verifier:
         Returns
         -------
         VerificationResult
-            Final label, confidence, score, and explanation.
+            Final label, score, confidence, and explanation.
         """
 
         fused_score = self._validate_score(
@@ -101,9 +101,14 @@ class Verifier:
 
         else:
             label = "UNCERTAIN"
-            confidence = 1.0 - abs(
+
+            # Confidence is low near the middle of the
+            # uncertain range and increases toward the
+            # decision boundaries.
+            confidence = 2.0 * abs(
                 fused_score - 0.5
-            ) * 2
+            )
+
             reason = (
                 "The multimodal signals are not strong "
                 "enough for a confident decision."
