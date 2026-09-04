@@ -22,6 +22,19 @@ class EvidenceStanceAnalyzer:
             model=model_name,
         )
 
+    def _predict(self, text: str, text_pair: str) -> tuple[str, float]:
+        result = self.classifier(
+            {
+                "text": text,
+                "text_pair": text_pair,
+            }
+        )
+
+        if isinstance(result, list):
+            result = result[0]
+
+        return result["label"].lower(), float(result["score"])
+
     def analyze(self, claim: str, evidence: str) -> EvidenceStance:
         if not isinstance(claim, str) or not claim.strip():
             raise ValueError("claim must be a non-empty string")
@@ -29,29 +42,52 @@ class EvidenceStanceAnalyzer:
         if not isinstance(evidence, str) or not evidence.strip():
             raise ValueError("evidence must be a non-empty string")
 
-        result = self.classifier(
-            {
-                "text": claim,
-                "text_pair": evidence,
-            }
+        claim_label, claim_confidence = self._predict(
+            claim,
+            evidence,
         )
 
-        if isinstance(result, list):
-            result = result[0]
+        evidence_label, evidence_confidence = self._predict(
+            evidence,
+            claim,
+        )
 
-        raw_label = result["label"].lower()
-        confidence = float(result["score"])
+        # Strong contradiction in either direction is treated as contradiction.
+        if (
+            claim_label == "contradiction"
+            and claim_confidence >= 0.80
+        ) or (
+            evidence_label == "contradiction"
+            and evidence_confidence >= 0.80
+        ):
+            confidence = max(
+                claim_confidence
+                if claim_label == "contradiction"
+                else 0.0,
+                evidence_confidence
+                if evidence_label == "contradiction"
+                else 0.0,
+            )
 
-        if raw_label == "entailment":
-            label = "SUPPORTS"
-        elif raw_label == "contradiction":
-            label = "CONTRADICTS"
-        else:
-            label = "NEUTRAL"
+            return EvidenceStance(
+                label="CONTRADICTS",
+                confidence=confidence,
+            )
+
+        # If the original claim -> evidence direction is entailment,
+        # treat the evidence as supporting the claim.
+        if claim_label == "entailment":
+            return EvidenceStance(
+                label="SUPPORTS",
+                confidence=claim_confidence,
+            )
 
         return EvidenceStance(
-            label=label,
-            confidence=confidence,
+            label="NEUTRAL",
+            confidence=max(
+                claim_confidence,
+                evidence_confidence,
+            ),
         )
 
 
