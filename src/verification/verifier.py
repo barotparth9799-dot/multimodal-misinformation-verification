@@ -64,26 +64,43 @@ class Verifier:
     def verify(
         self,
         fused_score: float,
+        evidence_score: float | None = None,
     ) -> VerificationResult:
         """
-        Convert a fused score into a verification decision.
+        Convert multimodal signals into a verification decision.
 
-        Parameters
-        ----------
-        fused_score:
-            Combined multimodal verification score.
-
-        Returns
-        -------
-        VerificationResult
-            Final label, score, confidence, and explanation.
+        If no relevant evidence is available, the result is treated
+        as UNCERTAIN rather than automatically being classified as
+        MISINFORMATION.
         """
 
         fused_score = self._validate_score(
             fused_score
         )
 
-        if fused_score >= self.verified_threshold:
+        if evidence_score is not None:
+            evidence_score = self._validate_score(
+                evidence_score
+            )
+
+        # No relevant evidence should not automatically mean
+        # misinformation. The system does not have enough
+        # evidence to make a reliable negative claim.
+        if evidence_score == 0.0:
+            label = "UNCERTAIN"
+
+            confidence = min(
+                1.0,
+                2.0 * abs(fused_score - 0.5)
+            )
+
+            reason = (
+                "No sufficiently relevant evidence was "
+                "retrieved for the claim, so the result "
+                "is treated as uncertain."
+            )
+
+        elif fused_score >= self.verified_threshold:
             label = "VERIFIED"
             confidence = fused_score
             reason = (
@@ -102,9 +119,6 @@ class Verifier:
         else:
             label = "UNCERTAIN"
 
-            # Confidence is low near the middle of the
-            # uncertain range and increases toward the
-            # decision boundaries.
             confidence = 2.0 * abs(
                 fused_score - 0.5
             )

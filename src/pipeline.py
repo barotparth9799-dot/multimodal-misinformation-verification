@@ -136,7 +136,7 @@ class MultimodalVerificationPipeline:
         )
 
         if evidence_results:
-            evidence_score = max(
+            raw_evidence_score = max(
                 0.0,
                 min(
                     1.0,
@@ -147,6 +147,17 @@ class MultimodalVerificationPipeline:
                     ),
                 ),
             )
+
+            # Treat retrieval similarity as evidence relevance,
+            # not as direct proof of truth.
+            #
+            # Scores below 0.50 indicate that the retrieved
+            # evidence is weakly related to the claim.
+            if raw_evidence_score < 0.50:
+                evidence_score = 0.0
+            else:
+                evidence_score = raw_evidence_score
+
         else:
             evidence_score = 0.0
 
@@ -164,8 +175,12 @@ class MultimodalVerificationPipeline:
             evidence_score=evidence_score,
         )
 
+        # Pass both the fused score and evidence score so that
+        # the verifier can distinguish between weak evidence
+        # and absence of sufficiently relevant evidence.
         verification_result = self.verifier.verify(
-            fusion_result.fused_score
+            fused_score=fusion_result.fused_score,
+            evidence_score=evidence_score,
         )
 
         explanation = self.explainer.generate(
