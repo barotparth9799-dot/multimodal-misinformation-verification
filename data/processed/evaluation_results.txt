@@ -60,3 +60,92 @@ Confidence: 37.79%
 Consistency: 0.5916
 Evidence Score: 0.7794
 Fused Score: 0.6890
+
+
+============================================================
+FINAL 10-CASE EVALUATION
+============================================================
+
+Evaluation Dataset: 10 controlled multimodal test cases
+
+Case 1
+Expected: VERIFIED
+Predicted: VERIFIED
+Confidence: 72.33%
+Consistency: 0.5292
+Evidence Score: 1.0000
+Fused Score: 0.7233
+
+Case 2
+Expected: UNCERTAIN
+Predicted: UNCERTAIN
+Confidence: 30.77%
+Consistency: 0.4784
+Evidence Score: 1.0000
+Fused Score: 0.6538
+
+Case 3
+Expected: UNCERTAIN
+Predicted: UNCERTAIN
+Confidence: 37.44%
+Consistency: 0.5038
+Evidence Score: 0.9972
+Fused Score: 0.6872
+
+Case 4
+Expected: UNCERTAIN
+Predicted: UNCERTAIN
+Confidence: 34.87%
+Consistency: 0.4934
+Evidence Score: 1.0000
+Fused Score: 0.6743
+
+Case 5
+Expected: UNCERTAIN
+Predicted: UNCERTAIN
+Confidence: 35.04%
+Consistency: 0.5007
+Evidence Score: 0.9802
+Fused Score: 0.6752
+
+Case 6
+Expected: UNCERTAIN
+Predicted: UNCERTAIN
+Confidence: 13.82%
+Consistency: 0.4887
+Evidence Score: 0.7794
+Fused Score: 0.5691
+
+Case 7
+Expected: VERIFIED
+Predicted: VERIFIED
+Confidence: 73.69%
+Consistency: 0.5392
+Evidence Score: 1.0000
+Fused Score: 0.7369
+
+Case 8
+Expected: UNCERTAIN
+Predicted: VERIFIED
+Confidence: 71.77%
+Consistency: 0.5252
+Evidence Score: 1.0000
+Fused Score: 0.7177
+
+Case 9
+Expected: VERIFIED
+Predicted: VERIFIED
+Confidence: 73.70%
+Consistency: 0.5392
+Evidence Score: 1.0000
+Fused Score: 0.7370
+
+Case 10
+Expected: UNCERTAIN
+Predicted: UNCERTAIN
+Confidence: 34.36%
+Consistency: 0.4915
+Evidence Score: 1.0000
+Fused Score: 0.6718
+
+Overall Accuracy: 90.00%
