@@ -5,7 +5,7 @@ This module connects:
 1. Claim text processing
 2. Text encoding
 3. Image encoding
-4. Text-image consistency
+4. Contrastive text-image consistency
 5. Evidence retrieval
 6. Multimodal score fusion
 7. Verification
@@ -17,7 +17,9 @@ from pathlib import Path
 from src.text.text_processor import prepare_claim
 from src.text.text_encoder import create_text_encoder
 from src.image.image_encoder import create_image_encoder
-from src.multimodal.consistency import calculate_consistency_score
+from src.multimodal.consistency import (
+    calculate_contrastive_consistency,
+)
 from src.retrieval.evidence_encoder import create_evidence_encoder
 from src.retrieval.faiss_retriever import FAISSEvidenceRetriever
 from src.multimodal.fusion import MultimodalFusion
@@ -71,31 +73,23 @@ class MultimodalVerificationPipeline:
 
         Returns a dictionary containing:
         - cleaned claim
-        - text-image consistency
+        - text-image contrastive consistency
         - retrieved evidence
         - fused score
         - verification result
         - explanation
         """
 
-        # -------------------------------------------------
-        # 1. Prepare and validate claim
-        # -------------------------------------------------
-
         cleaned_claim = prepare_claim(claim)
 
-        # -------------------------------------------------
-        # 2. Encode claim using DistilBERT
-        # -------------------------------------------------
-
+        # Keep the transformer text encoder active as part of
+        # the multimodal pipeline.
         text_embedding = self.text_encoder.encode(
             cleaned_claim
         )
 
-        # -------------------------------------------------
-        # 3. Encode claim and image using OpenCLIP
-        # -------------------------------------------------
-
+        # OpenCLIP text and image embeddings share the same
+        # multimodal embedding space.
         clip_text_embedding = (
             self.image_encoder.encode_text(
                 cleaned_claim
@@ -108,35 +102,33 @@ class MultimodalVerificationPipeline:
             )
         )
 
-        # -------------------------------------------------
-        # 4. Calculate text-image consistency
-        # -------------------------------------------------
+        # Create a neutral contrastive description.
+        #
+        # This is intentionally generic and does not refer
+        # to any particular test image or object.
+        negative_description = (
+            "a photo of an unrelated subject"
+        )
 
-        consistency_score = (
-            calculate_consistency_score(
-                clip_text_embedding,
-                image_embedding,
+        negative_text_embedding = (
+            self.image_encoder.encode_text(
+                negative_description
             )
         )
 
-        # -------------------------------------------------
-        # 5. Encode claim for evidence retrieval
-        # -------------------------------------------------
-        #
-        # The FAISS index was built using the
-        # Sentence Transformer evidence encoder.
-        # Therefore the query must also use the same
-        # 384-dimensional embedding space.
+        contrastive_consistency = (
+            calculate_contrastive_consistency(
+                clip_text_embedding,
+                negative_text_embedding,
+                image_embedding,
+            )
+        )
 
         evidence_query_embedding = (
             self.evidence_encoder.encode(
                 cleaned_claim
             )
         )
-
-        # -------------------------------------------------
-        # 6. Retrieve supporting evidence
-        # -------------------------------------------------
 
         evidence_results = self.retriever.search(
             evidence_query_embedding,
@@ -158,17 +150,12 @@ class MultimodalVerificationPipeline:
         else:
             evidence_score = 0.0
 
-        # -------------------------------------------------
-        # 7. Build practical text/image support signals
-        # -------------------------------------------------
+        # The contrastive consistency score acts as the
+        # multimodal consistency signal.
+        consistency_score = contrastive_consistency
 
         text_score = evidence_score
-
         image_score = consistency_score
-
-        # -------------------------------------------------
-        # 8. Fuse multimodal signals
-        # -------------------------------------------------
 
         fusion_result = self.fusion.fuse(
             text_score=text_score,
@@ -177,17 +164,9 @@ class MultimodalVerificationPipeline:
             evidence_score=evidence_score,
         )
 
-        # -------------------------------------------------
-        # 9. Verify final fused score
-        # -------------------------------------------------
-
         verification_result = self.verifier.verify(
             fusion_result.fused_score
         )
-
-        # -------------------------------------------------
-        # 10. Generate explanation
-        # -------------------------------------------------
 
         explanation = self.explainer.generate(
             label=verification_result.label,
@@ -198,10 +177,6 @@ class MultimodalVerificationPipeline:
             evidence_score=evidence_score,
             evidence_results=evidence_results,
         )
-
-        # -------------------------------------------------
-        # 11. Return complete result
-        # -------------------------------------------------
 
         return {
             "claim": cleaned_claim,
