@@ -2,8 +2,8 @@
 Evaluation metrics for the Multimodal Misinformation
 Verification project.
 
-This module calculates standard classification metrics and
-generates a confusion matrix.
+This module calculates standard classification metrics,
+macro-averaged metrics, and a confusion matrix.
 """
 
 from typing import Any
@@ -52,8 +52,8 @@ class VerificationEvaluator:
         Returns
         -------
         dict
-            Accuracy, precision, recall, F1-score,
-            and confusion matrix.
+            Accuracy, weighted precision, weighted recall,
+            weighted F1-score, macro F1-score, and confusion matrix.
         """
 
         if len(true_labels) != len(predicted_labels):
@@ -112,6 +112,14 @@ class VerificationEvaluator:
             zero_division=0,
         )
 
+        macro_f1 = f1_score(
+            true_labels,
+            predicted_labels,
+            labels=self.labels,
+            average="macro",
+            zero_division=0,
+        )
+
         matrix = confusion_matrix(
             true_labels,
             predicted_labels,
@@ -123,6 +131,7 @@ class VerificationEvaluator:
             "precision": float(precision),
             "recall": float(recall),
             "f1_score": float(f1),
+            "macro_f1": float(macro_f1),
             "confusion_matrix": matrix,
             "labels": self.labels,
         }
