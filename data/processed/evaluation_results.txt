@@ -149,3 +149,28 @@ Evidence Score: 1.0000
 Fused Score: 0.6718
 
 Overall Accuracy: 90.00%
+
+FINAL 12-CASE EVALUATION
+
+Case 1: expected VERIFIED, predicted VERIFIED, confidence 0.7233, consistency 0.5292, evidence 1.0000, fused 0.7233
+Case 2: expected UNCERTAIN, predicted UNCERTAIN, confidence 0.3077, consistency 0.4784, evidence 1.0000, fused 0.6538
+Case 3: expected UNCERTAIN, predicted UNCERTAIN, confidence 0.3744, consistency 0.5038, evidence 0.9972, fused 0.6872
+Case 4: expected UNCERTAIN, predicted UNCERTAIN, confidence 0.3487, consistency 0.4934, evidence 1.0000, fused 0.6743
+Case 5: expected UNCERTAIN, predicted UNCERTAIN, confidence 0.3504, consistency 0.5007, evidence 0.9802, fused 0.6752
+Case 6: expected UNCERTAIN, predicted UNCERTAIN, confidence 0.1382, consistency 0.4887, evidence 0.7794, fused 0.5691
+Case 7: expected VERIFIED, predicted VERIFIED, confidence 0.7369, consistency 0.5392, evidence 1.0000, fused 0.7369
+Case 8: expected UNCERTAIN, predicted VERIFIED, confidence 0.7177, consistency 0.5252, evidence 1.0000, fused 0.7177
+Case 9: expected VERIFIED, predicted VERIFIED, confidence 0.7370, consistency 0.5392, evidence 1.0000, fused 0.7370
+Case 10: expected UNCERTAIN, predicted UNCERTAIN, confidence 0.3436, consistency 0.4915, evidence 1.0000, fused 0.6718
+Case 11: expected VERIFIED, predicted UNCERTAIN, confidence 0.3813, consistency 0.5054, evidence 1.0000, fused 0.6907
+Case 12: expected UNCERTAIN, predicted UNCERTAIN, confidence 0.3343, consistency 0.4881, evidence 1.0000, fused 0.6671
+
+Accuracy: 0.8333
+Precision: 0.8333
+Recall: 0.8333
+F1 Score: 0.8333
+
+Confusion Matrix:
+[[0 0 0]
+ [0 7 1]
+ [0 1 3]]
