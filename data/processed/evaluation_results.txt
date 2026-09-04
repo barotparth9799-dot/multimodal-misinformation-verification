@@ -174,3 +174,164 @@ Confusion Matrix:
 [[0 0 0]
  [0 7 1]
  [0 1 3]]
+
+============================================================
+FINAL 15-CASE EVALUATION - BIDIRECTIONAL NLI
+============================================================
+
+Evaluation Dataset: 15 controlled multimodal test cases
+
+Case 1
+Expected: VERIFIED
+Predicted: VERIFIED
+Confidence: 72.33%
+Consistency: 0.5292
+Evidence Score: 1.0000
+Stance: SUPPORTS
+
+Case 2
+Expected: UNCERTAIN
+Predicted: UNCERTAIN
+Confidence: 30.77%
+Consistency: 0.4784
+Evidence Score: 1.0000
+Stance: SUPPORTS
+
+Case 3
+Expected: UNCERTAIN
+Predicted: UNCERTAIN
+Confidence: 37.44%
+Consistency: 0.5038
+Evidence Score: 0.9972
+Stance: SUPPORTS
+
+Case 4
+Expected: UNCERTAIN
+Predicted: UNCERTAIN
+Confidence: 34.87%
+Consistency: 0.4934
+Evidence Score: 1.0000
+Stance: SUPPORTS
+
+Case 5
+Expected: UNCERTAIN
+Predicted: UNCERTAIN
+Confidence: 35.04%
+Consistency: 0.5007
+Evidence Score: 0.9802
+Stance: NEUTRAL
+
+Case 6
+Expected: UNCERTAIN
+Predicted: UNCERTAIN
+Confidence: 13.82%
+Consistency: 0.4887
+Evidence Score: 0.7794
+Stance: NEUTRAL
+
+Case 7
+Expected: VERIFIED
+Predicted: VERIFIED
+Confidence: 73.69%
+Consistency: 0.5392
+Evidence Score: 1.0000
+Stance: SUPPORTS
+
+Case 8
+Expected: UNCERTAIN
+Predicted: VERIFIED
+Confidence: 71.77%
+Consistency: 0.5252
+Evidence Score: 1.0000
+Stance: SUPPORTS
+
+Case 9
+Expected: VERIFIED
+Predicted: VERIFIED
+Confidence: 73.70%
+Consistency: 0.5392
+Evidence Score: 1.0000
+Stance: SUPPORTS
+
+Case 10
+Expected: UNCERTAIN
+Predicted: UNCERTAIN
+Confidence: 34.36%
+Consistency: 0.4915
+Evidence Score: 1.0000
+Stance: SUPPORTS
+
+Case 11
+Expected: VERIFIED
+Predicted: UNCERTAIN
+Confidence: 38.13%
+Consistency: 0.5054
+Evidence Score: 1.0000
+Stance: SUPPORTS
+
+Case 12
+Expected: UNCERTAIN
+Predicted: UNCERTAIN
+Confidence: 33.43%
+Consistency: 0.4881
+Evidence Score: 1.0000
+Stance: SUPPORTS
+
+Case 13
+Expected: MISINFORMATION
+Predicted: MISINFORMATION
+Confidence: 99.88%
+Consistency: 0.5340
+Evidence Score: 0.8076
+Stance: CONTRADICTS
+
+Case 14
+Expected: MISINFORMATION
+Predicted: MISINFORMATION
+Confidence: 99.83%
+Consistency: 0.5282
+Evidence Score: 0.6470
+Stance: CONTRADICTS
+
+Case 15
+Expected: MISINFORMATION
+Predicted: MISINFORMATION
+Confidence: 99.65%
+Consistency: 0.5074
+Evidence Score: 0.6395
+Stance: CONTRADICTS
+
+
+============================================================
+FINAL METRICS
+============================================================
+
+Accuracy: 0.8667
+Precision: 0.8667
+Recall: 0.8667
+F1 Score: 0.8667
+
+Accuracy: 86.67%
+Precision: 86.67%
+Recall: 86.67%
+F1 Score: 86.67%
+
+Confusion Matrix:
+[[3 0 0]
+ [0 7 1]
+ [0 1 3]]
+
+Labels:
+MISINFORMATION
+UNCERTAIN
+VERIFIED
+
+Final Evaluation Summary:
+12 out of 15 cases were classified correctly.
+
+All 3 misinformation cases were correctly identified.
+7 out of 8 uncertain cases were correctly identified.
+3 out of 4 verified cases were correctly identified.
+
+The bidirectional NLI evidence stance module improved contradiction detection,
+particularly for claims that directly conflict with retrieved evidence.
