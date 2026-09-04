@@ -350,3 +350,17 @@ and 87.50% macro F1.
 Macro F1 is reported separately to evaluate performance
 across MISINFORMATION, UNCERTAIN, and VERIFIED classes
 without weighting classes by their frequency.
+
+============================================================
+FINAL 15-CASE CALIBRATION RESULTS
+============================================================
+
+Expected Calibration Error (ECE): 0.30086
+Mean Confidence: 0.56581
+
+The final 15-case evaluation achieved an Expected Calibration
+Error of 0.30086. Lower ECE indicates better agreement between
+predicted confidence and actual classification correctness.
+
+Calibration was evaluated using the confidence values produced
+by the final bidirectional NLI multimodal verification system.
