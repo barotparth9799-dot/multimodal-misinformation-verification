@@ -1,133 +1,63 @@
-"""
-End-to-end multimodal misinformation verification pipeline.
-
-This module connects:
-1. Claim text processing
-2. Text encoding
-3. Image encoding
-4. Contrastive text-image consistency
-5. Evidence retrieval
-6. Multimodal score fusion
-7. Verification
-8. Human-readable explanation
-"""
-
 from pathlib import Path
 
 from src.text.text_processor import prepare_claim
 from src.text.text_encoder import create_text_encoder
 from src.image.image_encoder import create_image_encoder
-from src.multimodal.consistency import (
-    calculate_contrastive_consistency,
-)
+from src.multimodal.consistency import calculate_contrastive_consistency
 from src.retrieval.evidence_encoder import create_evidence_encoder
 from src.retrieval.faiss_retriever import FAISSEvidenceRetriever
+from src.retrieval.evidence_stance import create_evidence_stance_analyzer
 from src.multimodal.fusion import MultimodalFusion
 from src.verification.verifier import create_verifier
 from src.explanation.explainer import ExplanationGenerator
-
 from configs.config import TOP_K_EVIDENCE
 
 
 class MultimodalVerificationPipeline:
-    """
-    Complete pipeline for multimodal misinformation verification.
-    """
-
-    def __init__(
-        self,
-        evidence_file: str | Path = "data/evidence/evidence.csv",
-    ) -> None:
-
+    def __init__(self, evidence_file="data/evidence/evidence.csv"):
         self.text_encoder = create_text_encoder()
         self.image_encoder = create_image_encoder()
-
         self.evidence_encoder = create_evidence_encoder()
+        self.stance_analyzer = create_evidence_stance_analyzer()
 
-        self.retriever = FAISSEvidenceRetriever(
+        self.retriever = FAISSEvidenceRetriever(evidence_file)
+
+        evidence_embeddings = self.evidence_encoder.encode_from_file(
             evidence_file
         )
-
-        evidence_embeddings = (
-            self.evidence_encoder.encode_from_file(
-                evidence_file
-            )
-        )
-
-        self.retriever.build_index(
-            evidence_embeddings
-        )
+        self.retriever.build_index(evidence_embeddings)
 
         self.fusion = MultimodalFusion()
         self.verifier = create_verifier()
         self.explainer = ExplanationGenerator()
 
-    def verify(
-        self,
-        claim: str,
-        image_path: str | Path,
-        top_k: int = TOP_K_EVIDENCE,
-    ) -> dict:
-        """
-        Run complete multimodal verification.
-
-        Returns a dictionary containing:
-        - cleaned claim
-        - text-image contrastive consistency
-        - retrieved evidence
-        - fused score
-        - verification result
-        - explanation
-        """
-
+    def verify(self, claim, image_path, top_k=TOP_K_EVIDENCE):
         cleaned_claim = prepare_claim(claim)
 
-        # Keep the transformer text encoder active as part of
-        # the multimodal pipeline.
-        text_embedding = self.text_encoder.encode(
+        text_embedding = self.text_encoder.encode(cleaned_claim)
+
+        clip_text_embedding = self.image_encoder.encode_text(
             cleaned_claim
         )
 
-        # OpenCLIP text and image embeddings share the same
-        # multimodal embedding space.
-        clip_text_embedding = (
-            self.image_encoder.encode_text(
-                cleaned_claim
-            )
+        image_embedding = self.image_encoder.encode_from_path(
+            image_path
         )
 
-        image_embedding = (
-            self.image_encoder.encode_from_path(
-                image_path
-            )
+        negative_description = "a photo of an unrelated subject"
+
+        negative_text_embedding = self.image_encoder.encode_text(
+            negative_description
         )
 
-        # Create a neutral contrastive description.
-        #
-        # This is intentionally generic and does not refer
-        # to any particular test image or object.
-        negative_description = (
-            "a photo of an unrelated subject"
+        contrastive_consistency = calculate_contrastive_consistency(
+            clip_text_embedding,
+            negative_text_embedding,
+            image_embedding,
         )
 
-        negative_text_embedding = (
-            self.image_encoder.encode_text(
-                negative_description
-            )
-        )
-
-        contrastive_consistency = (
-            calculate_contrastive_consistency(
-                clip_text_embedding,
-                negative_text_embedding,
-                image_embedding,
-            )
-        )
-
-        evidence_query_embedding = (
-            self.evidence_encoder.encode(
-                cleaned_claim
-            )
+        evidence_query_embedding = self.evidence_encoder.encode(
+            cleaned_claim
         )
 
         evidence_results = self.retriever.search(
@@ -135,34 +65,30 @@ class MultimodalVerificationPipeline:
             top_k=top_k,
         )
 
+        evidence_score = 0.0
+        evidence_stance = "NEUTRAL"
+        stance_confidence = 0.0
+
         if evidence_results:
             raw_evidence_score = max(
                 0.0,
                 min(
                     1.0,
-                    float(
-                        evidence_results[0][
-                            "similarity"
-                        ]
-                    ),
+                    float(evidence_results[0]["similarity"]),
                 ),
             )
 
-            # Treat retrieval similarity as evidence relevance,
-            # not as direct proof of truth.
-            #
-            # Scores below 0.50 indicate that the retrieved
-            # evidence is weakly related to the claim.
-            if raw_evidence_score < 0.50:
-                evidence_score = 0.0
-            else:
+            if raw_evidence_score >= 0.50:
                 evidence_score = raw_evidence_score
 
-        else:
-            evidence_score = 0.0
+                stance_result = self.stance_analyzer.analyze(
+                    cleaned_claim,
+                    evidence_results[0]["text"],
+                )
 
-        # The contrastive consistency score acts as the
-        # multimodal consistency signal.
+                evidence_stance = stance_result.label
+                stance_confidence = stance_result.confidence
+
         consistency_score = contrastive_consistency
 
         text_score = evidence_score
@@ -175,13 +101,34 @@ class MultimodalVerificationPipeline:
             evidence_score=evidence_score,
         )
 
-        # Pass both the fused score and evidence score so that
-        # the verifier can distinguish between weak evidence
-        # and absence of sufficiently relevant evidence.
+        fused_score = fusion_result.fused_score
+
+        if (
+            evidence_stance == "CONTRADICTS"
+            and stance_confidence >= 0.80
+        ):
+            fused_score = min(
+                fused_score,
+                1.0 - stance_confidence,
+            )
+
         verification_result = self.verifier.verify(
-            fused_score=fusion_result.fused_score,
+            fused_score=fused_score,
             evidence_score=evidence_score,
         )
+
+        if (
+            evidence_stance == "CONTRADICTS"
+            and stance_confidence >= 0.80
+        ):
+            verification_result = verification_result.__class__(
+                label="MISINFORMATION",
+                confidence=stance_confidence,
+                fused_score=fused_score,
+                reason=(
+                    "Retrieved evidence strongly contradicts the claim."
+                ),
+            )
 
         explanation = self.explainer.generate(
             label=verification_result.label,
@@ -195,27 +142,17 @@ class MultimodalVerificationPipeline:
 
         return {
             "claim": cleaned_claim,
-            "image_path": str(image_path),
+            "image_path": str(Path(image_path)),
             "text_score": text_score,
             "image_score": image_score,
             "consistency_score": consistency_score,
             "evidence_score": evidence_score,
-            "fused_score": fusion_result.fused_score,
+            "fused_score": fused_score,
             "label": verification_result.label,
             "confidence": verification_result.confidence,
             "reason": verification_result.reason,
             "explanation": explanation,
             "evidence": evidence_results,
+            "evidence_stance": evidence_stance,
+            "stance_confidence": stance_confidence,
         }
-
-
-def create_pipeline(
-    evidence_file: str | Path = "data/evidence/evidence.csv",
-) -> MultimodalVerificationPipeline:
-    """
-    Create and return the complete verification pipeline.
-    """
-
-    return MultimodalVerificationPipeline(
-        evidence_file=evidence_file
-    )
