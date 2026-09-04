@@ -138,6 +138,8 @@ class MultimodalVerificationPipeline:
             consistency_score=consistency_score,
             evidence_score=evidence_score,
             evidence_results=evidence_results,
+            evidence_stance=evidence_stance,
+            stance_confidence=stance_confidence,
         )
 
         return {
@@ -156,3 +158,7 @@ class MultimodalVerificationPipeline:
             "evidence_stance": evidence_stance,
             "stance_confidence": stance_confidence,
         }
+
+
+def create_pipeline() -> MultimodalVerificationPipeline:
+    return MultimodalVerificationPipeline()

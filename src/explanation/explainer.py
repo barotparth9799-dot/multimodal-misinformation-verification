@@ -23,37 +23,11 @@ class ExplanationGenerator:
         consistency_score: float,
         evidence_score: float,
         evidence_results: list[dict[str, Any]] | None = None,
+        evidence_stance: str = "NEUTRAL",
+        stance_confidence: float = 0.0,
     ) -> str:
         """
         Generate a human-readable verification explanation.
-
-        Parameters
-        ----------
-        label:
-            Final verification label.
-
-        confidence:
-            Confidence of the final decision.
-
-        text_score:
-            Text-based verification signal.
-
-        image_score:
-            Image-based verification signal.
-
-        consistency_score:
-            Text-image consistency score.
-
-        evidence_score:
-            Evidence relevance score.
-
-        evidence_results:
-            Retrieved evidence records.
-
-        Returns
-        -------
-        str
-            Human-readable explanation.
         """
 
         evidence_results = evidence_results or []
@@ -102,18 +76,39 @@ class ExplanationGenerator:
                 "The text and image show moderate consistency."
             )
 
-        if evidence_score >= 0.70:
+        if (
+            evidence_stance == "CONTRADICTS"
+            and stance_confidence >= 0.80
+        ):
             explanation_parts.append(
-                "Retrieved evidence strongly supports the claim."
+                "Retrieved evidence strongly contradicts the claim."
             )
-        elif evidence_score <= 0.35:
-            explanation_parts.append(
-                "Retrieved evidence provides weak support."
-            )
+        elif evidence_stance == "SUPPORTS":
+            if evidence_score >= 0.70:
+                explanation_parts.append(
+                    "Retrieved evidence strongly supports the claim."
+                )
+            elif evidence_score <= 0.35:
+                explanation_parts.append(
+                    "Retrieved evidence provides weak support."
+                )
+            else:
+                explanation_parts.append(
+                    "Retrieved evidence provides moderate support."
+                )
         else:
-            explanation_parts.append(
-                "Retrieved evidence provides moderate support."
-            )
+            if evidence_score >= 0.70:
+                explanation_parts.append(
+                    "Retrieved evidence is highly relevant to the claim."
+                )
+            elif evidence_score <= 0.35:
+                explanation_parts.append(
+                    "Retrieved evidence provides weak support."
+                )
+            else:
+                explanation_parts.append(
+                    "Retrieved evidence provides moderate support."
+                )
 
         if evidence_results:
             top_evidence = evidence_results[0]
