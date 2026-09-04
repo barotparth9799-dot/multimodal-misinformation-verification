@@ -335,3 +335,18 @@ All 3 misinformation cases were correctly identified.
 
 The bidirectional NLI evidence stance module improved contradiction detection,
 particularly for claims that directly conflict with retrieved evidence.
+
+============================================================
+FINAL 15-CASE METRICS - MACRO F1
+============================================================
+
+Accuracy: 0.8667
+Weighted F1: 0.8667
+Macro F1: 0.8750
+
+The final 15-case evaluation achieved 86.67% accuracy
+and 87.50% macro F1.
+
+Macro F1 is reported separately to evaluate performance
+across MISINFORMATION, UNCERTAIN, and VERIFIED classes
+without weighting classes by their frequency.
