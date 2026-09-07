@@ -1,8 +1,8 @@
-\# Multimodal Misinformation Verification
+# Multimodal Misinformation Verification
 
 
 
-\## Project Overview
+## Project Overview
 
 
 
@@ -14,7 +14,7 @@ The system accepts a textual claim and an associated image, analyzes both modali
 
 
 
-\## Project Type
+## Project Type
 
 
 
@@ -22,7 +22,7 @@ T.Y. B.Sc. Artificial Intelligence - Semester V Capstone Project
 
 
 
-\## Problem Statement
+## Problem Statement
 
 
 
@@ -38,29 +38,29 @@ This project develops a multimodal verification pipeline that combines:
 
 
 
-\- Text representation
+- Text representation
 
-\- Image representation
+- Image representation
 
-\- Text-image consistency
+- Text-image consistency
 
-\- Semantic evidence retrieval
+- Semantic evidence retrieval
 
-\- Evidence stance analysis
+- Evidence stance analysis
 
-\- Multimodal fusion
+- Multimodal fusion
 
-\- Confidence-aware verification
+- Confidence-aware verification
 
-\- Human-readable explanations
-
-
-
-\## Core Components
+- Human-readable explanations
 
 
 
-\### 1. Text Processing
+## Core Components
+
+
+
+### 1. Text Processing
 
 
 
@@ -68,7 +68,7 @@ The system cleans and validates the submitted claim before processing it.
 
 
 
-\### 2. Text Encoding
+### 2. Text Encoding
 
 
 
@@ -76,7 +76,7 @@ DistilBERT is used to generate semantic representations of the claim.
 
 
 
-\### 3. Image Encoding
+### 3. Image Encoding
 
 
 
@@ -84,7 +84,7 @@ OpenCLIP is used to represent images and text in a shared multimodal embedding s
 
 
 
-\### 4. Text-Image Consistency
+### 4. Text-Image Consistency
 
 
 
@@ -96,7 +96,7 @@ A contrastive consistency approach compares the claim against the image and an u
 
 
 
-\### 5. Evidence Retrieval
+### 5. Evidence Retrieval
 
 
 
@@ -108,7 +108,7 @@ Sentence Transformers are used to generate evidence embeddings, and FAISS is use
 
 
 
-\### 6. Evidence Stance Analysis
+### 6. Evidence Stance Analysis
 
 
 
@@ -120,11 +120,11 @@ Evidence can be interpreted as:
 
 
 
-\- SUPPORTS
+- SUPPORTS
 
-\- CONTRADICTS
+- CONTRADICTS
 
-\- NEUTRAL
+- NEUTRAL
 
 
 
@@ -132,7 +132,7 @@ Bidirectional NLI analysis is used to improve contradiction detection.
 
 
 
-\### 7. Multimodal Fusion
+### 7. Multimodal Fusion
 
 
 
@@ -144,7 +144,7 @@ A consistency gate reduces the influence of evidence when the image is poorly al
 
 
 
-\### 8. Verification
+### 8. Verification
 
 
 
@@ -152,11 +152,11 @@ The system produces one of three outcomes:
 
 
 
-\- VERIFIED
+- VERIFIED
 
-\- MISINFORMATION
+- MISINFORMATION
 
-\- UNCERTAIN
+- UNCERTAIN
 
 
 
@@ -164,7 +164,7 @@ The system also produces a confidence score.
 
 
 
-\### 9. Explanation
+### 9. Explanation
 
 
 
@@ -172,21 +172,21 @@ The final result includes a human-readable explanation describing:
 
 
 
-\- Text signal
+- Text signal
 
-\- Image signal
+- Image signal
 
-\- Text-image consistency
+- Text-image consistency
 
-\- Evidence relevance
+- Evidence relevance
 
-\- Evidence stance
+- Evidence stance
 
-\- Top retrieved source
+- Top retrieved source
 
 
 
-\### 10. Streamlit Interface
+### 10. Streamlit Interface
 
 
 
@@ -210,33 +210,33 @@ A Streamlit web interface allows the user to:
 
 
 
-\## Technology Stack
+## Technology Stack
 
 
 
-\- Python
+- Python
 
-\- PyTorch
+- PyTorch
 
-\- Hugging Face Transformers
+- Hugging Face Transformers
 
-\- Sentence Transformers
+- Sentence Transformers
 
-\- OpenCLIP
+- OpenCLIP
 
-\- OpenCV
+- OpenCV
 
-\- FAISS
+- FAISS
 
-\- Scikit-learn
+- Scikit-learn
 
-\- Streamlit
+- Streamlit
 
-\- Git
+- Git
 
 
 
-\## Project Structure
+## Project Structure
 
 
 
