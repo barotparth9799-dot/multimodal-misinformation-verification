@@ -1,0 +1,78 @@
+MODALITY ABLATION RESULTS
+Multimodal Misinformation Verification Project
+
+Evaluation Dataset:
+15 controlled multimodal test cases
+
+Purpose:
+Measure the contribution of evidence retrieval and image-text
+consistency by comparing different system configurations.
+
+------------------------------------------------------------
+RESULTS
+------------------------------------------------------------
+
+1. EVIDENCE-ONLY
+Accuracy: 0.6000 (60.00%)
+Macro F1: 0.6571 (65.71%)
+
+2. IMAGE-ONLY
+Accuracy: 0.5333 (53.33%)
+Macro F1: 0.2319 (23.19%)
+
+3. EVIDENCE + IMAGE CONSISTENCY
+Accuracy: 0.8667 (86.67%)
+Macro F1: 0.8750 (87.50%)
+
+4. FULL MULTIMODAL SYSTEM
+Accuracy: 0.8667 (86.67%)
+Macro F1: 0.8750 (87.50%)
+
+------------------------------------------------------------
+ABLATION FINDINGS
+------------------------------------------------------------
+
+Evidence-only performance:
+60.00% Accuracy and 65.71% Macro F1.
+
+Adding image-text consistency increased performance to:
+86.67% Accuracy and 87.50% Macro F1.
+
+Accuracy improvement:
+86.67% - 60.00% = 26.67 percentage points.
+
+Macro F1 improvement:
+87.50% - 65.71% = 21.79 percentage points.
+
+Image-only performance was substantially weaker:
+53.33% Accuracy and 23.19% Macro F1.
+
+The Evidence + Image Consistency configuration produced the same
+classification performance as the full multimodal system on this
+controlled evaluation set.
+
+------------------------------------------------------------
+INTERPRETATION
+------------------------------------------------------------
+
+The ablation experiment demonstrates that combining evidence-based
+verification with image-text consistency substantially improves
+performance compared with either modality used independently.
+
+Evidence retrieval provides factual evidence and NLI-based stance
+information, while image-text consistency provides an independent
+multimodal signal.
+
+The image-only configuration performs poorly as a standalone factual
+verification method, showing that visual similarity alone is not
+sufficient for reliable misinformation verification.
+
+The full multimodal system achieved the same classification metrics
+as the Evidence + Image Consistency configuration on the current
+15-case controlled dataset.
+
+IMPORTANT:
+These results demonstrate component contribution on a controlled
+evaluation dataset. They do not guarantee equivalent performance on
+unseen real-world data. Larger and more diverse validation is required
+for final model acceptance.
