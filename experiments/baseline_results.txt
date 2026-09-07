@@ -1,0 +1,65 @@
+BASELINE COMPARISON RESULTS
+Multimodal Misinformation Verification Project
+
+Evaluation Dataset:
+15 controlled multimodal test cases
+
+Purpose:
+Compare single-modality baselines against the full multimodal verification system.
+
+------------------------------------------------------------
+RESULTS
+------------------------------------------------------------
+
+1. EVIDENCE-ONLY BASELINE
+Accuracy: 0.6000 (60.00%)
+Macro F1: 0.6571 (65.71%)
+
+2. IMAGE-ONLY BASELINE
+Accuracy: 0.5333 (53.33%)
+Macro F1: 0.2319 (23.19%)
+
+3. FULL MULTIMODAL SYSTEM
+Accuracy: 0.8667 (86.67%)
+Macro F1: 0.8750 (87.50%)
+
+------------------------------------------------------------
+COMPARISON
+------------------------------------------------------------
+
+The full multimodal system achieved the highest performance.
+
+Accuracy improvement over evidence-only baseline:
+86.67% - 60.00% = 26.67 percentage points
+
+Accuracy improvement over image-only baseline:
+86.67% - 53.33% = 33.34 percentage points
+
+Macro F1 improvement over evidence-only baseline:
+87.50% - 65.71% = 21.79 percentage points
+
+Macro F1 improvement over image-only baseline:
+87.50% - 23.19% = 64.31 percentage points
+
+------------------------------------------------------------
+INTERPRETATION
+------------------------------------------------------------
+
+The baseline experiment demonstrates that neither evidence retrieval
+alone nor image-text consistency alone performs as well as the
+combined multimodal approach.
+
+The full multimodal system combines evidence-based verification,
+NLI-based evidence stance analysis, and image-text consistency through
+the multimodal fusion and verification pipeline.
+
+On this controlled 15-case evaluation dataset, the combined approach
+achieved 86.67% accuracy and 87.50% Macro F1, substantially exceeding
+both single-modality baselines.
+
+These results support the project's multimodal design.
+
+IMPORTANT:
+These results are from a controlled evaluation dataset and should not
+be treated as a general real-world performance guarantee. Additional
+realistic and diverse validation is required before final acceptance.
