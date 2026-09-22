@@ -25,12 +25,14 @@ class ExplanationGenerator:
         evidence_results: list[dict[str, Any]] | None = None,
         evidence_stance: str = "NEUTRAL",
         stance_confidence: float = 0.0,
+        compound_claim_results: list[dict[str, Any]] | None = None,
     ) -> str:
         """
         Generate a human-readable verification explanation.
         """
 
         evidence_results = evidence_results or []
+        compound_claim_results = compound_claim_results or []
 
         explanation_parts = [
             f"Final result: {label}.",
@@ -76,7 +78,30 @@ class ExplanationGenerator:
                 "The text and image show moderate consistency."
             )
 
-        if (
+        strong_compound_contradictions = [
+            result
+            for result in compound_claim_results
+            if (
+                result.get("stance") == "CONTRADICTS"
+                and result.get("confidence", 0.0) >= 0.80
+            )
+        ]
+
+        if strong_compound_contradictions:
+            contradicted_claims = [
+                result.get("claim", "an evaluated subclaim")
+                for result in strong_compound_contradictions
+            ]
+
+            explanation_parts.append(
+                "Compound claim analysis found at least one strongly "
+                "contradicted subclaim: "
+                + "; ".join(
+                    f'"{claim}"' for claim in contradicted_claims
+                )
+                + "."
+            )
+        elif (
             evidence_stance == "CONTRADICTS"
             and stance_confidence >= 0.80
         ):

@@ -5,6 +5,7 @@ from src.retrieval.faiss_retriever import FAISSEvidenceRetriever
 
 
 EVIDENCE_FILE = "data/evidence/evidence.csv"
+EVIDENCE_COUNT = 13
 
 
 @pytest.fixture
@@ -13,26 +14,26 @@ def retriever():
 
 
 def test_retriever_loads_evidence_file(retriever):
-    assert len(retriever.evidence_data) == 11
+    assert len(retriever.evidence_data) == EVIDENCE_COUNT
     assert retriever.index is None
 
 
 def test_build_index_creates_faiss_index(retriever):
-    embeddings = torch.eye(11, dtype=torch.float32)
+    embeddings = torch.eye(EVIDENCE_COUNT, dtype=torch.float32)
 
     retriever.build_index(embeddings)
 
     assert retriever.index is not None
-    assert retriever.embedding_dimension == 11
-    assert retriever.index.ntotal == 11
+    assert retriever.embedding_dimension == EVIDENCE_COUNT
+    assert retriever.index.ntotal == EVIDENCE_COUNT
 
 
 def test_search_returns_requested_number_of_results(retriever):
-    embeddings = torch.eye(11, dtype=torch.float32)
+    embeddings = torch.eye(EVIDENCE_COUNT, dtype=torch.float32)
+
     retriever.build_index(embeddings)
 
     query = embeddings[0]
-
     results = retriever.search(query, top_k=3)
 
     assert len(results) == 3
@@ -40,11 +41,11 @@ def test_search_returns_requested_number_of_results(retriever):
 
 
 def test_search_returns_expected_metadata(retriever):
-    embeddings = torch.eye(11, dtype=torch.float32)
+    embeddings = torch.eye(EVIDENCE_COUNT, dtype=torch.float32)
+
     retriever.build_index(embeddings)
 
     results = retriever.search(embeddings[0], top_k=1)
-
     result = results[0]
 
     assert result["evidence_id"] == "E001"
@@ -55,16 +56,18 @@ def test_search_returns_expected_metadata(retriever):
 
 
 def test_top_k_cannot_exceed_evidence_count(retriever):
-    embeddings = torch.eye(11, dtype=torch.float32)
+    embeddings = torch.eye(EVIDENCE_COUNT, dtype=torch.float32)
+
     retriever.build_index(embeddings)
 
     results = retriever.search(embeddings[0], top_k=100)
 
-    assert len(results) == 11
+    assert len(results) == EVIDENCE_COUNT
 
 
 def test_search_accepts_2d_query_embedding(retriever):
-    embeddings = torch.eye(11, dtype=torch.float32)
+    embeddings = torch.eye(EVIDENCE_COUNT, dtype=torch.float32)
+
     retriever.build_index(embeddings)
 
     results = retriever.search(
@@ -77,7 +80,7 @@ def test_search_accepts_2d_query_embedding(retriever):
 
 
 def test_search_requires_built_index(retriever):
-    query = torch.ones(11)
+    query = torch.ones(EVIDENCE_COUNT)
 
     with pytest.raises(RuntimeError):
         retriever.search(query)
@@ -85,35 +88,46 @@ def test_search_requires_built_index(retriever):
 
 def test_build_index_requires_tensor(retriever):
     with pytest.raises(TypeError):
-        retriever.build_index([[1.0, 0.0]] * 11)
+        retriever.build_index([[1.0, 0.0]] * EVIDENCE_COUNT)
 
 
 def test_build_index_requires_2d_tensor(retriever):
     with pytest.raises(ValueError):
-        retriever.build_index(torch.ones(11))
+        retriever.build_index(torch.ones(EVIDENCE_COUNT))
 
 
 def test_build_index_requires_matching_record_count(retriever):
-    embeddings = torch.eye(10, dtype=torch.float32)
+    embeddings = torch.eye(
+        EVIDENCE_COUNT - 1,
+        dtype=torch.float32,
+    )
 
     with pytest.raises(ValueError):
         retriever.build_index(embeddings)
 
 
 def test_search_rejects_wrong_dimension(retriever):
-    embeddings = torch.eye(11, dtype=torch.float32)
+    embeddings = torch.eye(EVIDENCE_COUNT, dtype=torch.float32)
+
     retriever.build_index(embeddings)
 
     with pytest.raises(ValueError):
-        retriever.search(torch.ones(10), top_k=1)
+        retriever.search(
+            torch.ones(EVIDENCE_COUNT - 1),
+            top_k=1,
+        )
 
 
 def test_search_rejects_invalid_top_k(retriever):
-    embeddings = torch.eye(11, dtype=torch.float32)
+    embeddings = torch.eye(EVIDENCE_COUNT, dtype=torch.float32)
+
     retriever.build_index(embeddings)
 
     with pytest.raises(ValueError):
-        retriever.search(embeddings[0], top_k=0)
+        retriever.search(
+            embeddings[0],
+            top_k=0,
+        )
 
 
 def test_missing_evidence_file_is_rejected():
@@ -127,8 +141,7 @@ def test_missing_required_columns_are_rejected(tmp_path):
     csv_file = tmp_path / "invalid_evidence.csv"
 
     csv_file.write_text(
-        "id,text\n"
-        "E001,Example evidence\n",
+        "id,text\nE001,Example evidence\n",
         encoding="utf-8",
     )
 

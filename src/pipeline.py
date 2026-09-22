@@ -243,6 +243,7 @@ class MultimodalVerificationPipeline:
             evidence_results=evidence_results,
             evidence_stance=evidence_stance,
             stance_confidence=stance_confidence,
+            compound_claim_results=compound_result["subclaims"],
         )
 
         return {
