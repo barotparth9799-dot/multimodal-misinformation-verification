@@ -1,5 +1,13 @@
 # Multimodal Misinformation Verification
 
+## Live Demo
+
+**Try the deployed application:**  
+https://multimodal-misinformation-verification.streamlit.app/
+
+The deployed application accepts a textual claim and an associated image, performs multimodal verification, retrieves supporting evidence, and provides a confidence-aware explanation.
+
+
 
 
 ## Project Overview
